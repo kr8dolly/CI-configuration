@@ -1,0 +1,50 @@
+stages:
+  - build
+  - test
+  - deploy
+
+build-release:
+  stage: build
+  script: |
+    scons -j8 platform=x11 tools=no target=release bits=64 use_lto=yes
+    ls -l ./bin/
+  artifacts:
+    paths:
+    - ./bin/
+    expire_in: "1 hour"
+
+build-test:
+  stage: build
+  script: |
+    scons -j8 platform=x11 tests=yes bits=64 tools=yes
+    ls -l ./bin/
+  artifacts:
+    paths:
+    - ./bin/
+    expire_in: "1 hour"
+
+codecheck:
+  stage: test
+  script: |
+    ./misc/scripts/file_format.sh
+    ./misc/scripts/clang_format.sh
+    ./misc/scripts/black_format.sh
+    doc/tools/makerst.py --dry-run doc/classes modules
+  allow_failure: true
+
+test:
+  stage: test
+  needs:
+    - job: build-test
+      artifacts: true
+  script: |
+    ls -l ./bin/
+    ./bin/godot.linuxbsd.tools.64 --test
+
+deploy:
+  stage: deploy
+  needs:
+    - job: build-release
+      artifacts: true
+  script: |
+    ls -l ./bin/
