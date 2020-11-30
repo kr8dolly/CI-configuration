@@ -15,7 +15,7 @@ Then start services with following command: docker-compose up -d
 Go to http://gitlab.local.
 Clone https://github.com/godotengine/godot.git. 
 Create .gitlab-ci.ymlfile in the root of the project.
-
+Set maximum artifact size in an Admin Area.
 Register GitLab Runner using following command:
 docker-compose exec gitlab-runner 
 gitlab-runner register 
